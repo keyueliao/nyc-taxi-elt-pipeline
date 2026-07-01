@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: fct_trips
+    description: >
+      Central fact table. One row per yellow taxi trip.
+      Partitioned by pickup_date, clustered by pickup_borough and payment_type_name.
+      Join to dim_taxi_zones on pickup_location_id or dropoff_location_id for geographic context.
+    columns:
+      - name: trip_id
+        description: Surrogate key. Unique per trip.
+        tests:
+          - unique
+          - not_null
+      - name: pickup_date
+        tests:
+          - not_null
+      - name: trip_distance
+        tests:
+          - not_null
+      - name: total_amount
+        tests:
+          - not_null
+      - name: pickup_location_id
+        tests:
+          - not_null
+      - name: dropoff_location_id
+        tests:
+          - not_null
+
+  - name: dim_taxi_zones
+    description: >
+      Taxi zone dimension. 265 rows — one per NYC TLC zone.
+      Type 1 SCD (no history). Join to fct_trips on zone_id.
+    columns:
+      - name: zone_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: borough
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island", "EWR"]
+      - name: is_airport
+        tests:
+          - not_null

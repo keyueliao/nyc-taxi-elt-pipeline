@@ -1,0 +1,36 @@
+name: nyc_taxi_pipeline
+version: "1.0.0"
+config-version: 2
+
+profile: nyc_taxi_pipeline
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  nyc_taxi_pipeline:
+    # Staging: thin views directly over raw source tables.
+    # No business logic here — just renaming, casting, and light cleanup.
+    staging:
+      +materialized: view
+      +schema: staging
+
+    # Intermediate: joins and business logic that don't belong in staging
+    # but aren't ready to be consumed directly by analysts.
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+
+    # Marts: analyst-facing, production-ready tables.
+    # Core = canonical facts and dims. Analytics = pre-aggregated for dashboards.
+    marts:
+      core:
+        +materialized: table
+        +schema: marts
+      analytics:
+        +materialized: table
+        +schema: marts

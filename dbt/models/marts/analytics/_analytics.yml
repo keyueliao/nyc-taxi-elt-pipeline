@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: agg_daily_trip_metrics
+    description: >
+      Daily aggregated trip metrics. One row per day.
+      Intended for time-series dashboards — avoids full fct_trips scans on every load.
+    columns:
+      - name: pickup_date
+        description: The date being summarized.
+        tests:
+          - unique
+          - not_null
+      - name: total_trips
+        tests:
+          - not_null
+      - name: total_revenue
+        tests:
+          - not_null
+
+  - name: agg_zone_performance
+    description: >
+      Per-zone aggregated metrics across all time. One row per pickup zone.
+      Answers: which neighborhoods generate the most revenue, highest tips, fastest trips?
+    columns:
+      - name: zone_id
+        description: Primary key — matches dim_taxi_zones.zone_id.
+        tests:
+          - unique
+          - not_null

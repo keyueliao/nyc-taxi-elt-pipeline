@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: stg_taxi__trips
+    description: >
+      Cleaned and renamed yellow taxi trip records. One row per trip.
+      Filters out physically impossible trips (zero distance, negative fares, etc.).
+    columns:
+      - name: vendor_id
+        description: Vendor that submitted the trip record.
+      - name: pickup_datetime
+        description: When the meter was engaged.
+        tests:
+          - not_null
+      - name: dropoff_datetime
+        description: When the meter was disengaged.
+        tests:
+          - not_null
+      - name: trip_distance
+        description: Trip distance in miles.
+        tests:
+          - not_null
+      - name: fare_amount
+        description: Metered fare in USD.
+        tests:
+          - not_null
+      - name: total_amount
+        description: Total charged to the passenger in USD.
+        tests:
+          - not_null
+      - name: pickup_location_id
+        description: TLC zone ID where the trip started.
+        tests:
+          - not_null
+      - name: dropoff_location_id
+        description: TLC zone ID where the trip ended.
+        tests:
+          - not_null
+      - name: trip_duration_minutes
+        description: Computed trip duration (dropoff minus pickup) in minutes.
+
+  - name: stg_taxi__zones
+    description: TLC taxi zone lookup. Maps zone_id to borough and neighborhood.
+    columns:
+      - name: zone_id
+        description: Unique zone identifier (string).
+        tests:
+          - unique
+          - not_null
+      - name: zone_name
+        description: Neighborhood name.
+        tests:
+          - not_null
+      - name: borough
+        description: NYC borough.
+        tests:
+          - not_null

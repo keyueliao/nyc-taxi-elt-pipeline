@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: int_trips__enriched
+    description: >
+      Trips joined with zone names, payment labels, and rate code labels.
+      Adds derived columns: trip_id (surrogate key), avg_speed_mph, tip_pct,
+      and date-part extractions for downstream aggregations.
+      Intended to be referenced by marts — not directly by analysts.
+    columns:
+      - name: trip_id
+        description: Surrogate key. SHA hash of vendor + pickup/dropoff datetimes + locations.
+        tests:
+          - unique
+          - not_null
+      - name: pickup_datetime
+        tests:
+          - not_null
+      - name: dropoff_datetime
+        tests:
+          - not_null
+      - name: trip_distance
+        tests:
+          - not_null
+      - name: total_amount
+        tests:
+          - not_null

@@ -1,0 +1,56 @@
+version: 2
+
+# Sources declare the raw tables that dbt does NOT own.
+# They were created by the ingestion script (load_taxi_data.py).
+# Declaring them here lets dbt: test freshness, document lineage,
+# and ref them with source() instead of hardcoded project.dataset.table strings.
+
+sources:
+  - name: raw_nyc_taxi
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: raw_nyc_taxi
+    description: Raw NYC TLC taxi data loaded by the ingestion pipeline.
+    config:
+      freshness:
+        warn_after: {count: 24, period: hour}
+        error_after: {count: 48, period: hour}
+      loaded_at_field: pickup_datetime
+
+    tables:
+      - name: trips
+        description: >
+          Raw yellow taxi trip records. One row per trip.
+          Loaded from bigquery-public-data.new_york_taxi_trips.tlc_yellow_trips_2023.
+        columns:
+          - name: vendor_id
+            description: TPEP provider that provided the record (1=Creative Mobile, 2=VeriFone).
+          - name: pickup_datetime
+            description: Date and time when the meter was engaged.
+          - name: dropoff_datetime
+            description: Date and time when the meter was disengaged.
+          - name: passenger_count
+            description: Number of passengers. Driver-entered value.
+          - name: trip_distance
+            description: Elapsed trip distance in miles reported by the taximeter.
+          - name: pickup_location_id
+            description: TLC Taxi Zone where the meter was engaged.
+          - name: dropoff_location_id
+            description: TLC Taxi Zone where the meter was disengaged.
+          - name: payment_type
+            description: How the passenger paid (1=Credit card, 2=Cash, 3=No charge, 4=Dispute).
+          - name: fare_amount
+            description: Meter-calculated fare based on time and distance.
+          - name: total_amount
+            description: Total amount charged to passengers (excludes cash tips).
+
+      - name: taxi_zones
+        description: >
+          TLC taxi zone lookup table. Maps zone_id to borough and neighborhood name.
+          Has known duplicate zone_ids (56, 103) in source — handled in stg_taxi__zones.
+        columns:
+          - name: zone_id
+            description: Zone identifier (string). Matches pickup/dropoff_location_id in trips.
+          - name: zone_name
+            description: Human-readable neighborhood name.
+          - name: borough
+            description: NYC borough (Manhattan, Brooklyn, Queens, Bronx, Staten Island, EWR).

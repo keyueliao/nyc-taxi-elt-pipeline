@@ -1,0 +1,5 @@
+packages:
+  # dbt-utils: essential macros every AE uses daily
+  # Provides: generate_surrogate_key, date_spine, safe_divide, pivot, etc.
+  - package: dbt-labs/dbt_utils
+    version: 1.3.0
